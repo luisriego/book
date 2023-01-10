@@ -15,12 +15,17 @@ RUN apt update \
     # common libraries and extensions
     && apt install -y git acl openssl openssh-client wget zip \
     && apt install -y libpng-dev zlib1g-dev libzip-dev libxml2-dev libicu-dev \
-    && docker-php-ext-install intl pdo zip \
+    && apt install -y libxslt-dev \
+    && docker-php-ext-install intl pdo xsl zip \
     # for MySQL
     && docker-php-ext-install pdo_mysql \
     # for Postgres
     && apt install -y libpq-dev \
-    && docker-php-ext-install pdo_pgsql \
+    && docker-php-ext-install gd pdo_pgsql \
+    # for redis \
+    && pecl install -o -f redis \
+    &&  rm -rf /tmp/pear \
+    &&  docker-php-ext-enable redis \
     # for RabbitMQ and XDEBUG
     && docker-php-ext-install bcmath sockets \
     && apt install -y librabbitmq-dev vim libssh-dev \
@@ -38,9 +43,9 @@ RUN composer self-update
 USER appuser
 RUN wget https://get.symfony.com/cli/installer -O - | bash
 USER root
-RUN mv /home/appuser/.symfony/bin/symfony /usr/local/bin/symfony
+# RUN mv /home/appuser/.symfony/bin/symfony /usr/local/bin/symfony
 # for symfony 5
-# RUN mv /home/appuser/.symfony5/bin/symfony /usr/local/bin/symfony
+RUN mv /home/appuser/.symfony5/bin/symfony /usr/local/bin/symfony
 
 # Install PHP-CS-FIXER
 RUN wget https://cs.symfony.com/download/php-cs-fixer-v2.phar -O php-cs-fixer
